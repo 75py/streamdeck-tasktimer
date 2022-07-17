@@ -1,11 +1,6 @@
 /* global $CC, Utils, $SD */
 
 /**
- * Here are a couple of wrappers we created to help you quickly setup
- * your plugin and subscribe to events sent by Stream Deck to your plugin.
- */
-
-/**
  * The 'connected' event is sent to your plugin, after the plugin's instance
  * is registered with Stream Deck software. It carries the current websocket
  * and other information about the current environmet in a JSON object
