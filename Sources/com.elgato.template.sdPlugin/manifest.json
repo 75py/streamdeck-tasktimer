@@ -9,7 +9,7 @@
         }
       ], 
       "Tooltip": "This is an example tooltip", 
-      "UUID": "com.elgato.template.action"
+      "UUID": "com.nagopy.streamdeck.tasktimer.action"
     }
   ], 
   "SDKVersion": 2,
