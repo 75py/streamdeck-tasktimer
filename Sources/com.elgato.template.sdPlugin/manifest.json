@@ -17,7 +17,7 @@
   "CodePath": "index.html", 
   "PropertyInspectorPath": "propertyinspector/index.html", 
   "Description": "Example description", 
-  "Name": "Stream Deck Template", 
+  "Name": "Task Timer",
   "Icon": "action/images/action", 
   "URL": "https://www.elgato.com/en/gaming/stream-deck", 
   "Version": "1.0.1",

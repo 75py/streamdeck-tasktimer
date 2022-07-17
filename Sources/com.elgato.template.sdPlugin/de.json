@@ -1,6 +1,6 @@
 {
   "Description": "Nimm diese Vorlage für dein erstes Plugin", 
-  "Name": "Stream Deck Template", 
+  "Name": "Task Timer",
   "Category": "Templates", 
   "com.nagopy.streamdeck.tasktimer.action": {
     "Name": "Action", 
