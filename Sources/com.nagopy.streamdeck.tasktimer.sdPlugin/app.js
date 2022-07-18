@@ -12,8 +12,8 @@ $SD.on('connected', (jsonObj) => connected(jsonObj));
 function connected(jsn) {
     // Subscribe to the willAppear and other events
     $SD.on('com.nagopy.streamdeck.tasktimer.action.willAppear', (jsonObj) => action.onWillAppear(jsonObj));
+    $SD.on('com.nagopy.streamdeck.tasktimer.action.keyDown', (jsonObj) => action.onKeyDown(jsonObj));
     $SD.on('com.nagopy.streamdeck.tasktimer.action.keyUp', (jsonObj) => action.onKeyUp(jsonObj));
-    $SD.on('com.nagopy.streamdeck.tasktimer.action.sendToPlugin', (jsonObj) => action.onSendToPlugin(jsonObj));
     $SD.on('com.nagopy.streamdeck.tasktimer.action.didReceiveSettings', (jsonObj) => action.onDidReceiveSettings(jsonObj));
     $SD.on('com.nagopy.streamdeck.tasktimer.action.propertyInspectorDidAppear', (jsonObj) => {
         console.log('%c%s', 'color: white; background: black; font-size: 13px;', '[app.js]propertyInspectorDidAppear:');
@@ -21,118 +21,206 @@ function connected(jsn) {
     $SD.on('com.nagopy.streamdeck.tasktimer.action.propertyInspectorDidDisappear', (jsonObj) => {
         console.log('%c%s', 'color: white; background: red; font-size: 13px;', '[app.js]propertyInspectorDidDisappear:');
     });
-};
+}
 
 // ACTIONS
 
 const action = {
-    settings:{},
-    onDidReceiveSettings: function(jsn) {
-        console.log('%c%s', 'color: white; background: red; font-size: 15px;', '[app.js]onDidReceiveSettings:');
 
-        this.settings = Utils.getProp(jsn, 'payload.settings', {});
-        this.doSomeThing(this.settings, 'onDidReceiveSettings', 'orange');
+    timers: {},
+    onDidReceiveSettings: function (jsn) {
+        console.log('[app.js]onDidReceiveSettings', jsn);
 
-        /**
-         * In this example we put a HTML-input element with id='mynameinput'
-         * into the Property Inspector's DOM. If you enter some data into that
-         * input-field it get's saved to Stream Deck persistently and the plugin
-         * will receive the updated 'didReceiveSettings' event.
-         * Here we look for this setting and use it to change the title of
-         * the key.
-         */
-
-         this.setTitle(jsn);
+        this.timers[jsn.context].updateSettings(jsn.payload.settings)
     },
 
-    /** 
-     * The 'willAppear' event is the first event a key will receive, right before it gets
-     * shown on your Stream Deck and/or in Stream Deck software.
-     * This event is a good place to setup your plugin and look at current settings (if any),
-     * which are embedded in the events payload.
-     */
-
     onWillAppear: function (jsn) {
-        console.log("You can cache your settings in 'onWillAppear'", jsn.payload.settings);
-        /**
-         * The willAppear event carries your saved settings (if any). You can use these settings
-         * to setup your plugin or save the settings for later use. 
-         * If you want to request settings at a later time, you can do so using the
-         * 'getSettings' event, which will tell Stream Deck to send your data 
-         * (in the 'didReceiveSettings above)
-         * 
-         * $SD.api.getSettings(jsn.context);
-        */
-        this.settings = jsn.payload.settings;
+        console.log('onWillAppear', jsn.payload.settings);
+        let ctx = jsn.context
+        this.timers[ctx] = new Timer(jsn)
+    },
 
-        // Nothing in the settings pre-fill, just something for demonstration purposes
-        if (!this.settings || Object.keys(this.settings).length === 0) {
-            this.settings.mynameinput = 'TEMPLATE';
-        }
-        this.setTitle(jsn);
+    onKeyDown: function (jsn) {
+        let ctx = jsn.context
+        let timer = this.timers[ctx]
+        timer.keyDownMs = new Date().getTime()
     },
 
     onKeyUp: function (jsn) {
-        this.doSomeThing(jsn, 'onKeyUp', 'green');
-    },
+        const ctx = jsn.context
+        const timer = this.timers[ctx]
 
-    onSendToPlugin: function (jsn) {
-        /**
-         * This is a message sent directly from the Property Inspector 
-         * (e.g. some value, which is not saved to settings) 
-         * You can send this event from Property Inspector (see there for an example)
-         */ 
-
-        const sdpi_collection = Utils.getProp(jsn, 'payload.sdpi_collection', {});
-        if (sdpi_collection.value && sdpi_collection.value !== undefined) {
-            this.doSomeThing({ [sdpi_collection.key] : sdpi_collection.value }, 'onSendToPlugin', 'fuchsia');            
-        }
-    },
-
-    /**
-     * This snippet shows how you could save settings persistantly to Stream Deck software.
-     * It is not used in this example plugin.
-     */
-
-    saveSettings: function (jsn, sdpi_collection) {
-        console.log('saveSettings:', jsn);
-        if (sdpi_collection.hasOwnProperty('key') && sdpi_collection.key != '') {
-            if (sdpi_collection.value && sdpi_collection.value !== undefined) {
-                this.settings[sdpi_collection.key] = sdpi_collection.value;
-                console.log('setSettings....', this.settings);
-                $SD.api.setSettings(jsn.context, this.settings);
+        const currentMs = new Date().getTime()
+        if (currentMs - timer.keyDownMs > 1200) {
+            timer.resetTimer()
+        } else {
+            switch (timer.status) {
+                case timerStatus.STANDBY:
+                    timer.startTimer()
+                    break
+                case timerStatus.RUNNING:
+                    timer.pauseTimer()
+                    break
+                case timerStatus.PAUSED:
+                    timer.startTimer()
+                    break
+                case timerStatus.FINISHED:
+                    timer.resetTimer()
+                    break
+                default:
+                    break
             }
         }
     },
-
-    /**
-     * Here's a quick demo-wrapper to show how you could change a key's title based on what you
-     * stored in settings.
-     * If you enter something into Property Inspector's name field (in this demo),
-     * it will get the title of your key.
-     * 
-     * @param {JSON} jsn // The JSON object passed from Stream Deck to the plugin, which contains the plugin's context
-     * 
-     */
-
-    setTitle: function(jsn) {
-        if (this.settings && this.settings.hasOwnProperty('mynameinput')) {
-            console.log("watch the key on your StreamDeck - it got a new title...", this.settings.mynameinput);
-            $SD.api.setTitle(jsn.context, this.settings.mynameinput);
-        }
-    },
-
-    /**
-     * Finally here's a method which gets called from various events above.
-     * This is just an idea on how you can act on receiving some interesting message
-     * from Stream Deck.
-     */
-
-    doSomeThing: function(inJsonData, caller, tagColor) {
-        console.log('%c%s', `color: white; background: ${tagColor || 'grey'}; font-size: 15px;`, `[app.js]doSomeThing from: ${caller}`);
-        // console.log(inJsonData);
-    }, 
-
-
 };
 
+const timerStatus = Object.freeze({
+    STANDBY: Symbol(0),
+    RUNNING: Symbol(1),
+    PAUSED: Symbol(2),
+    FINISHED: Symbol(3),
+})
+
+class Timer {
+    constructor(jsn) {
+        console.log('new Timer', this)
+        this.context = jsn.context
+        this.status = timerStatus.STANDBY
+        this.config = {
+            timerSec: 900,
+            alarmSound: 'None',
+            alarmVolume: 20,
+            alarmBlinkEnabled: false,
+            blinkingColor: '#606060',
+        }
+        this.updateSettings(jsn.payload.settings)
+
+        this.remainingSec = this.config.timerSec
+        this.updateTitle(this.config.timerSec)
+    }
+
+    updateSettings(settings) {
+        console.log('updateSettings', this)
+        if (!settings) {
+            return
+        }
+
+        if (settings.hasOwnProperty('timersec')) {
+            this.config.timerSec = parseInt(settings.timersec, 10)
+            if (this.status === timerStatus.STANDBY) {
+                this.remainingSec = this.config.timerSec
+                this.updateTitle(this.config.timerSec)
+            }
+        }
+
+        if (settings.hasOwnProperty('alarmSound')) {
+            this.config.alarmSound = settings.alarmSound
+        }
+
+        if (settings.hasOwnProperty('alarmVolume')) {
+            this.config.alarmVolume = parseInt(settings.alarmVolume, 10)
+        }
+
+        if (settings.hasOwnProperty('alarmBlinkEnabled')) {
+            this.config.alarmBlinkEnabled = settings.alarmBlinkEnabled === 'true'
+        }
+
+        if (settings.hasOwnProperty('blinkingColor')) {
+            this.config.blinkingColor = settings.blinkingColor
+        }
+    }
+
+    startTimer() {
+        console.log('startTimer', this)
+
+        this.countdown = setInterval(function () {
+            console.log('tick')
+
+            this.remainingSec--
+            this.updateTitle(this.remainingSec)
+            if (this.remainingSec <= 0) {
+                this.finishTimer(this.context)
+            }
+        }.bind(this), 1000)
+        this.status = timerStatus.RUNNING
+    }
+
+    pauseTimer() {
+        console.log('pauseTimer', this)
+
+        clearInterval(this.countdown)
+        this.countdown = null
+        this.status = timerStatus.PAUSED
+    }
+
+    finishTimer() {
+        console.log('finishTimer', this)
+
+        if (this.countdown) {
+            clearInterval(this.countdown)
+            this.countdown = null
+        }
+
+        if (this.config.alarmBlinkEnabled) {
+            $SD.api.setImage(this.context, new SvgUrl(this.config.blinkingColor).getUrl())
+            this.blinking = true
+            this.blinkInterval = setInterval(function () {
+                const newColor = this.blinking ? '#000000' : this.config.blinkingColor
+                $SD.api.setImage(this.context, new SvgUrl(newColor).getUrl())
+                this.blinking = !this.blinking
+            }.bind(this), 500)
+        }
+
+        if (this.config.alarmSound && this.config.alarmSound !== 'None') {
+            const sound = new Audio('action/sounds/' + this.config.alarmSound)
+            sound.volume = this.config.alarmVolume / 100.0
+            sound.loop = true
+            sound.play()
+            this.sound = sound
+        }
+
+        this.status = timerStatus.FINISHED
+    }
+
+    resetTimer() {
+        console.log('resetTimer', this)
+
+        if (this.countdown) {
+            clearInterval(this.countdown)
+            this.countdown = null
+        }
+        if (this.blinkInterval) {
+            clearInterval(this.blinkInterval)
+            this.blinkInterval = null
+        }
+        if (this.sound) {
+            this.sound.pause()
+            this.sound = null
+        }
+        $SD.api.setImage(this.context, '')
+        this.updateTitle(this.config.timerSec)
+        this.remainingSec = this.config.timerSec
+        this.status = timerStatus.STANDBY
+    }
+
+    updateTitle(sec) {
+        console.log('updateTitle', sec)
+        const mm = ('00' + Math.floor(sec / 60)).slice(-2)
+        const ss = ('00' + (sec % 60)).slice(-2)
+        $SD.api.setTitle(this.context, mm + ':' + ss)
+    }
+}
+
+class SvgUrl {
+    constructor(rgbStr) {
+        this.rgbStr = rgbStr
+    }
+
+    getUrl() {
+        return 'data:image/svg+xml;charset=utf8,<svg width="144" height="144" xmlns="http://www.w3.org/2000/svg"><rect stroke="'
+            + this.rgbStr
+            + '" id="svg_1" height="144" width="144" y="0" x="0" fill="'
+            + this.rgbStr
+            + '"/></svg>'
+    }
+}

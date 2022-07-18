@@ -35,12 +35,12 @@ let sdpiWrapper = document.querySelector('.sdpi-wrapper');
 
 let settings;
 
- /**
-  * The 'connected' event is the first event sent to Property Inspector, after it's instance
-  * is registered with Stream Deck software. It carries the current websocket, settings,
-  * and other information about the current environmet in a JSON object.
-  * You can use it to subscribe to events you want to use in your plugin.
-  */
+/**
+ * The 'connected' event is the first event sent to Property Inspector, after it's instance
+ * is registered with Stream Deck software. It carries the current websocket, settings,
+ * and other information about the current environmet in a JSON object.
+ * You can use it to subscribe to events you want to use in your plugin.
+ */
 
 $SD.on('connected', (jsn) => {
     /**
@@ -84,7 +84,7 @@ $SD.on('sendToPropertyInspector', jsn => {
     /**
      *  This is an example, how you could show an error to the user
      */
-     if (pl.hasOwnProperty('error')) {
+    if (pl.hasOwnProperty('error')) {
         sdpiWrapper.innerHTML = `<div class="sdpi-item">
             <details class="message caution">
             <summary class="${pl.hasOwnProperty('info') ? 'pointer' : ''}">${pl.error}</summary>
@@ -106,19 +106,23 @@ const updateUI = (pl) => {
     Object.keys(pl).map(e => {
         if (e && e != '') {
             const foundElement = document.querySelector(`#${e}`);
-            console.log(`searching for: #${e}`, 'found:', foundElement);
-            if (foundElement && foundElement.type !== 'file') {
-                foundElement.value = pl[e];
-                const maxl = foundElement.getAttribute('maxlength') || 50;
-                const labels = document.querySelectorAll(`[for='${foundElement.id}']`);
-                if (labels.length) {
-                    for (let x of labels) {
-                        x.textContent = maxl ? `${foundElement.value.length}/${maxl}` : `${foundElement.value.length}`;
+            console.log(`searching for: #${e}`, 'found:', foundElement, 'value:', pl[e]);
+            if (foundElement) {
+                if (foundElement.type === 'checkbox') {
+                    foundElement.checked = pl[e];
+                } else if (foundElement.type !== 'file') {
+                    foundElement.value = pl[e];
+                    const maxl = foundElement.getAttribute('maxlength') || 50;
+                    const labels = document.querySelectorAll(`[for='${foundElement.id}']`);
+                    if (labels.length) {
+                        for (let x of labels) {
+                            x.textContent = maxl ? `${foundElement.value.length}/${maxl}` : `${foundElement.value.length}`;
+                        }
                     }
                 }
             }
         }
-   })
+    })
 }
 
 /**
@@ -157,20 +161,20 @@ $SD.on('piDataChanged', (returnValue) => {
 
     console.log('%c%s', 'color: white; background: blue}; font-size: 15px;', 'piDataChanged');
     console.log(returnValue);
-    
+
     if (returnValue.key === 'clickme') {
 
         postMessage = (w) => {
             w.postMessage(
                 Object.assign({}, $SD.applicationInfo.application, {action: $SD.actionInfo.action})
-                ,'*');
+                , '*');
         }
 
         if (!window.xtWindow || window.xtWindow.closed) {
-            window.xtWindow  = window.open('../externalWindow.html', 'External Window');
+            window.xtWindow = window.open('../externalWindow.html', 'External Window');
             setTimeout(() => postMessage(window.xtWindow), 200);
         } else {
-           postMessage(window.xtWindow);
+            postMessage(window.xtWindow);
         }
 
     } else {
@@ -200,7 +204,7 @@ $SD.on('piDataChanged', (returnValue) => {
  *
  */
 
- function saveSettings(sdpi_collection) {
+function saveSettings(sdpi_collection) {
 
     if (typeof sdpi_collection !== 'object') return;
 
@@ -212,21 +216,21 @@ $SD.on('piDataChanged', (returnValue) => {
             $SD.api.setSettings($SD.uuid, settings);
         }
     }
- }
+}
 
- /**
-  * 'sendValueToPlugin' is a wrapper to send some values to the plugin
-  *
-  * It is called with a value and the name of a property:
-  *
-  * sendValueToPlugin(<any value>), 'key-property')
-  *
-  * where 'key-property' is the property you listen for in your plugin's
-  * 'sendToPlugin' events payload.
-  *
-  */
+/**
+ * 'sendValueToPlugin' is a wrapper to send some values to the plugin
+ *
+ * It is called with a value and the name of a property:
+ *
+ * sendValueToPlugin(<any value>), 'key-property')
+ *
+ * where 'key-property' is the property you listen for in your plugin's
+ * 'sendToPlugin' events payload.
+ *
+ */
 
- function sendValueToPlugin(value, prop) {
+function sendValueToPlugin(value, prop) {
     console.log("sendValueToPlugin", value, prop);
     if ($SD.connection && $SD.connection.readyState === 1) {
         const json = {
@@ -277,7 +281,7 @@ function prepareDOMElements(baseElement) {
             if (inputGroup.length === 2) {
                 const offs = inputGroup[0].tagName === 'INPUT' ? 1 : 0;
                 inputGroup[offs].textContent = inputGroup[1 - offs].value;
-                inputGroup[1 - offs]['oninput'] = function() {
+                inputGroup[1 - offs]['oninput'] = function () {
                     inputGroup[offs].textContent = inputGroup[1 - offs].value;
                 };
             }
@@ -287,16 +291,16 @@ function prepareDOMElements(baseElement) {
              */
             Array.from(el.querySelectorAll('.clickable')).forEach(
                 (subel, subi) => {
-                    subel['onclick'] = function(e) {
+                    subel['onclick'] = function (e) {
                         handleSdpiItemChange(e.target, subi);
                     };
                 }
             );
             /** Just in case the found HTML element already has an input or change - event attached,
              * we clone it, and call it in the callback, right before the freshly attached event
-            */
+             */
             const cloneEvt = el[evt];
-            el[evt] = function(e) {
+            el[evt] = function (e) {
                 if (cloneEvt) cloneEvt();
                 handleSdpiItemChange(e.target, i);
             };
@@ -362,9 +366,9 @@ function handleSdpiItemChange(e, idx) {
         // if there's no attribute set for the span, try to see, if there's a value in the textContent
         // and use it as value
         if (!e.hasAttribute('value')) {
-               tmpValue = Number(e.textContent);
+            tmpValue = Number(e.textContent);
             if (typeof tmpValue === 'number' && tmpValue !== null) {
-                e.setAttribute('value', 0+tmpValue); // this is ugly, but setting a value of 0 on a span doesn't do anything
+                e.setAttribute('value', 0 + tmpValue); // this is ugly, but setting a value of 0 on a span doesn't do anything
                 e.value = tmpValue;
             }
         } else {
@@ -394,7 +398,7 @@ function handleSdpiItemChange(e, idx) {
         }
     }
 
-    if (sdpiItemChildren.length && ['radio','checkbox'].includes(sdpiItemChildren[0].type)) {
+    if (sdpiItemChildren.length && ['radio', 'checkbox'].includes(sdpiItemChildren[0].type)) {
         e.setAttribute('_value', e.checked); //'_value' has priority over .value
     }
     if (sdpiItemGroup && !sdpiItemChildren.length) {
@@ -407,7 +411,7 @@ function handleSdpiItemChange(e, idx) {
     if (e.selectedIndex !== undefined) {
         if (e.tagName === 'SELECT') {
             sdpiItemChildren.forEach((ec, i) => {
-                selectedElements.push({ [ec.id]: ec.value });
+                selectedElements.push({[ec.id]: ec.value});
             });
         }
         idx = e.selectedIndex;
@@ -428,12 +432,12 @@ function handleSdpiItemChange(e, idx) {
         value: isList
             ? e.textContent
             : e.hasAttribute('_value')
-            ? e.getAttribute('_value')
-            : e.value
-            ? e.type === 'file'
-                ? decodeURIComponent(e.value.replace(/^C:\\fakepath\\/, ''))
+                ? e.getAttribute('_value')
                 : e.value
-            : e.getAttribute('value'),
+                    ? e.type === 'file'
+                        ? decodeURIComponent(e.value.replace(/^C:\\fakepath\\/, ''))
+                        : e.value
+                    : e.getAttribute('value'),
         group: sdpiItemGroup ? sdpiItemGroup.id : false,
         index: idx,
         selection: selectedElements,
@@ -448,11 +452,11 @@ function handleSdpiItemChange(e, idx) {
         const info = sdpiItem.querySelector('.sdpi-file-info');
         if (info) {
             const s = returnValue.value.split('/').pop();
-            info.textContent =                s.length > 28
-                    ? s.substr(0, 10)
-                      + '...'
-                      + s.substr(s.length - 10, s.length)
-                    : s;
+            info.textContent = s.length > 28
+                ? s.substr(0, 10)
+                + '...'
+                + s.substr(s.length - 10, s.length)
+                : s;
         }
     }
 
@@ -497,7 +501,7 @@ function localizeUI() {
  *
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     document.body.classList.add(navigator.userAgent.includes("Mac") ? 'mac' : 'win');
     prepareDOMElements();
     $SD.on('localizationLoaded', (language) => {
@@ -506,7 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /** the beforeunload event is fired, right before the PI will remove all nodes */
-window.addEventListener('beforeunload', function(e) {
+window.addEventListener('beforeunload', function (e) {
     e.preventDefault();
     sendValueToPlugin('propertyInspectorWillDisappear', 'property_inspector');
     // Don't set a returnValue to the event, otherwise Chromium with throw an error.  // e.returnValue = '';

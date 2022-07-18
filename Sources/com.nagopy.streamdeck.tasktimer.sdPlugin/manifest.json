@@ -2,25 +2,27 @@
   "Actions": [
     {
       "Icon": "action/images/actionimage", 
-      "Name": "Example Action", 
+      "Name": "Task Timer",
       "States": [
         {
-          "Image": "action/images/action"
+          "Image": "action/images/action",
+          "TitleAlignment": "middle",
+          "FontSize": "16"
         }
       ], 
-      "Tooltip": "This is an example tooltip", 
+      "Tooltip": "Show a simple timer",
       "UUID": "com.nagopy.streamdeck.tasktimer.action"
     }
   ], 
   "SDKVersion": 2,
-  "Author": "Elgato", 
+  "Author": "75py",
   "CodePath": "index.html", 
   "PropertyInspectorPath": "propertyinspector/index.html", 
-  "Description": "Example description", 
+  "Description": "Simple timer app for Stream deck.",
   "Name": "Task Timer",
-  "Icon": "action/images/action", 
-  "URL": "https://www.elgato.com/en/gaming/stream-deck", 
-  "Version": "1.0.1",
+  "Icon": "pluginIcon",
+  "URL": "https://github.com/75py/streamdeck-tasktimer",
+  "Version": "1.0.0",
   "OS": [
     {
         "Platform": "mac", 

@@ -1,53 +1,90 @@
 <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover">
-        <meta name=apple-mobile-web-app-capable content=yes>
-        <meta name=apple-mobile-web-app-status-bar-style content=black>
-        <title>com.nagopy.streamdeck.tasktimer Property Inspector</title>
-        <link rel="stylesheet" href="css/sdpi.css">
-    </head>
-    <body>
-        <div class="sdpi-wrapper">
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name=viewport
+          content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover">
+    <meta name=apple-mobile-web-app-capable content=yes>
+    <meta name=apple-mobile-web-app-status-bar-style content=black>
+    <title>com.nagopy.streamdeck.tasktimer Property Inspector</title>
+    <link rel="stylesheet" href="css/sdpi.css">
+</head>
+<body>
+<div class="sdpi-wrapper">
 
-          <!-- DROP HTML-STUFF BELOW -->
+    <!-- DROP HTML-STUFF BELOW -->
 
-          <!--
-            Here we just copied a couple of elements from the PISamples example, which contains
-            a huge collection pre-made HTML-elements for you to use.
-            Important here is (if you plan to communicate from the Property Inspector to the plugin without
-            further programming), that you add an 'id' to an element's control. 
-            This will get the 'key', which is sent to the plugin (or settings), along with the value of
-            the control.
-          -->
+    <!--
+      Here we just copied a couple of elements from the PISamples example, which contains
+      a huge collection pre-made HTML-elements for you to use.
+      Important here is (if you plan to communicate from the Property Inspector to the plugin without
+      further programming), that you add an 'id' to an element's control.
+      This will get the 'key', which is sent to the plugin (or settings), along with the value of
+      the control.
+    -->
 
-            <div class="sdpi-item">
-                <div class="sdpi-item-label">Name</div>
-                <input id="mynameinput" class="sdpi-item-value" type="text" value="" />
-             </div>
+    <div class="sdpi-item">
+        <div class="sdpi-item-label">Timer seconds</div>
+        <input id="timersec" class="sdpi-item-value" type="number" value="900"/>
+    </div>
 
-            <div type="textarea" class="sdpi-item">
-                <div class="sdpi-item-label up20" data-localize="Message">Message</div>
-                <div class="sdpi-item-value textarea">
-                  <textarea type="textarea" maxlength="50" id="mymessage" class="three-lines"></textarea>
-                  <label for="mymessage">0/50</label>
+    <div class="sdpi-heading">ALARM</div>
+
+    <div type="group" class="sdpi-item" id="alarmgroup">
+        <div class="sdpi-item-label">Sound</div>
+        <div class="sdpi-item-group">
+            <div type="select" class="sdpi-item">
+                <div class="sdpi-item-label">Sound</div>
+                <select id="alarmSound" class="sdpi-item-value select">
+                    <option value="None">None</option>
+                    <option value="Clock-Alarm01-1(Low-Loop).mp3">Low-Loop</option>
+                    <option value="Clock-Alarm01-2(Mid-Loop).mp3">Mid-Loop</option>
+                    <option value="Clock-Alarm01-3(High-Loop).mp3">High-Loop</option>
+                    <option value="Clock-Alarm01-4(Beep).mp3">Beep</option>
+                </select>
+            </div>
+
+            <div class="sdpi-item alignTop">
+                <div class="sdpi-item-label empty"></div>
+                <details open class="noInnerMargins">
+                    <summary>Info</summary>
+                    <p>provided by OtoLogic(CC BY 4.0)</p>
+                </details>
+            </div>
+
+            <div type="range" class="sdpi-item">
+                <div class="sdpi-item-label">Volume</div>
+                <div class="sdpi-item-value">
+                    <input id="alarmVolume" class="floating-tooltip" data-suffix="%" type="range" min="0" max="100" value=20>
                 </div>
-              </div>
-
-              <div class="sdpi-item">
-                <div class="sdpi-item-label">Button</div>
-                <button class="sdpi-item-value" id="clickme" value="Click Me" data-localize="Click me">Click Me</button>
-              </div>
-
-
-              <!-- END OF SDPI-WRAPPER -->
-
+            </div>
         </div>
 
-        <div class="sdpi-info-label hidden" style="top: -1000;" value=""></div>
-        <script src="js/common.js"></script>
-        <script src="js/common_pi.js"></script>
-        <script src="js/index_pi.js"></script>
-    </body>
-    </html>
+        <div class="sdpi-item-label">Blink</div>
+        <div type="checkbox" class="sdpi-item">
+            <div class="sdpi-item-label">Blink</div>
+            <div class="sdpi-item-value">
+                <div class="sdpi-item-child">
+                    <input id="alarmBlinkEnabled" type="checkbox">
+                    <label for="alarmBlinkEnabled" class="sdpi-item-label"><span></span>On</label>
+                </div>
+            </div>
+        </div>
+        <div class="sdpi-item-group">
+            <div type="color" class="sdpi-item">
+                <div class="sdpi-item-label">Color</div>
+                <input id="blinkingColor" type="color" class="sdpi-item-value" value="#606060">
+            </div>
+        </div>
+    </div>
+
+    <!-- END OF SDPI-WRAPPER -->
+
+</div>
+
+<div class="sdpi-info-label hidden" style="top: -1000;" value=""></div>
+<script src="js/common.js"></script>
+<script src="js/common_pi.js"></script>
+<script src="js/index_pi.js"></script>
+</body>
+</html>

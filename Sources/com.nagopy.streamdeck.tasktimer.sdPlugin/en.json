@@ -1,15 +1,10 @@
 {
-  "Description": "Use this to create your own plugin", 
+  "Description": "Simple timer",
   "Name": "Task Timer",
-  "Category": "Templates", 
   "com.nagopy.streamdeck.tasktimer.action": {
-    "Name": "Action", 
-    "Tooltip": "This is the only action in this plugin"
+    "Name": "Task Timer",
+    "Tooltip": "Show a simple timer"
   },
   "Localization": {
-    "More info": "More info",
-    "Message": "Message",
-    "Click Me": "Click Me",
-    "Button": "Button"
   }
 }
