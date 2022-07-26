@@ -2,7 +2,7 @@
   "Actions": [
     {
       "Icon": "action/images/actionimage", 
-      "Name": "Task Timer",
+      "Name": "Timer",
       "States": [
         {
           "Image": "action/images/action",
@@ -21,6 +21,8 @@
   "Description": "Simple timer app for Stream deck.",
   "Name": "Task Timer",
   "Icon": "pluginIcon",
+  "Category": "Task Timer",
+  "CategoryIcon": "categoryIcon",
   "URL": "https://github.com/75py/streamdeck-tasktimer",
   "Version": "1.0.0",
   "OS": [
